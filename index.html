@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Casustraining OM</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#082D6B">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Casustraining">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #C8D0DC;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    #shell {
+      max-width: 440px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #EEF1F6;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    #header {
+      background: #082D6B;
+      padding: 14px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-rij {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-rij.met-balk { margin-bottom: 10px; }
+    .header-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+    .header-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .voortgang-balk {
+      height: 3px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .voortgang-vulling {
+      height: 100%;
+      background: #C8102E;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── CONTENT ── */
+    #content { padding: 24px 20px 40px; flex: 1; }
+
+    /* ── TYPOGRAFIE ── */
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      color: #C8102E;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .scherm-titel {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1A2333;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+    .body-tekst {
+      font-size: 14px;
+      color: #1A2333;
+      line-height: 1.7;
+    }
+    .gedempt { color: #5E6B7E; }
+
+    /* ── KAARTEN ── */
+    .kaart {
+      background: #fff;
+      border: 1px solid #D8E0EC;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .kaart-blauw {
+      background: #EBF0FB;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .kaart-geel {
+      background: #FFF8EC;
+      border: 1px solid #F5D78B;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    /* ── KNOPPEN ── */
+    .knop {
+      display: block;
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      -webkit-appearance: none;
+      font-family: inherit;
+    }
+    .knop-primary { background: #082D6B; color: #fff; }
+    .knop-rood    { background: #C8102E; color: #fff; }
+    .knop-ghost   {
+      background: transparent;
+      border: 1px solid #D8E0EC;
+      color: #5E6B7E;
+      font-weight: 400;
+    }
+    .knop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── VERBAAL SELECTIE ── */
+    .verbaal-optie {
+      display: block;
+      width: 100%;
+      padding: 13px 16px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      border: 2px solid #D8E0EC;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      color: #1A2333;
+      font-family: inherit;
+      -webkit-appearance: none;
+    }
+    .verbaal-optie.geselecteerd {
+      border-color: #082D6B;
+      background: #EBF0FB;
+      font-weight: 700;
+    }
+
+    /* ── SITUATIE ITEMS ── */
+    .situatie-item {
+      display: flex;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid #D8E0EC;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .situatie-icoon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── DOCUMENT (verbaal) ── */
+    .document {
+      background: #FDFCF8;
+      border: 1px solid #C8BFAF;
+      border-radius: 4px;
+      padding: 20px 18px;
+      margin-bottom: 16px;
+      max-height: 420px;
+      overflow-y: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08), 2px 2px 0 #E0D9CE;
+      -webkit-overflow-scrolling: touch;
+    }
+    .document-mini {
+      background: #FDFCF8;
+      border: 1px solid #C8BFAF;
+      border-radius: 4px;
+      padding: 14px;
+      margin-bottom: 20px;
+      max-height: 240px;
+      overflow-y: auto;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      -webkit-overflow-scrolling: touch;
+    }
+    .doc-hoofd {
+      text-align: center;
+      border-bottom: 1px solid #C8BFAF;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .doc-titel {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #1A2333;
+      margin-bottom: 3px;
+    }
+    .doc-subtitel { font-size: 11px; color: #5E6B7E; }
+    .doc-sectie { margin-bottom: 18px; }
+    .doc-kop {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #082D6B;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .doc-tekst {
+      font-size: 13px;
+      color: #1A2333;
+      line-height: 1.75;
+      font-family: Georgia, 'Times New Roman', serif;
+      margin-bottom: 8px;
+    }
+
+    /* ── VERBAAL TOGGLE KNOP ── */
+    .verbaal-toggle {
+      border: 1px solid #D8E0EC;
+      border-radius: 8px;
+      background: #fff;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #082D6B;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+
+    /* ── VRAGEN ── */
+    .blok-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .vraag-blok { margin-bottom: 28px; }
+    .vraag-tekst {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1A2333;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+    .optie-knop {
+      display: block;
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      border: 2px solid #D8E0EC;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1A2333;
+      font-family: inherit;
+      -webkit-appearance: none;
+    }
+    .optie-knop.geselecteerd {
+      border-color: #082D6B;
+      background: #EBF0FB;
+      font-weight: 600;
+    }
+
+    /* ── UITKOMST ── */
+    .uitkomst-header {
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .verdict-icoon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #fff;
+      font-weight: 700;
+    }
+    .verdict-label {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .gevolg-kaart {
+      background: #fff;
+      border: 1px solid #D8E0EC;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .gevolg-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .gevolg-label { font-size: 14px; font-weight: 700; color: #1A2333; }
+    .nabespreking {
+      background: #EBF0FB;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 8px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="shell">
+  <div id="header"></div>
+  <div id="content"></div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+
+const VERBALEN = {
+  A: [
+    { kop: 'VERBALISANT',
+      tekst: 'Ik, [naam], surveillant van politie, werkzaam bij de Eenheid Den Haag, heb op zaterdag [datum] het volgende bevonden en verricht.' },
+    { kop: 'AANLEIDING',
+      tekst: 'Op zaterdag [datum] om 21:47 uur ontving ik via de meldkamer de opdracht te gaan naar de [straatnaam] te Den Haag. De melding betrof een straatroof waarbij het slachtoffer ter plaatse was. Signalement verdachte: jongen, geschat 15 tot 17 jaar, rode hoodie, donkere broek, gevlucht in de richting van de [straatnaam].' },
+    { kop: 'BEVINDINGEN TER PLAATSE',
+      tekst: 'Ik arriveerde om 21:52 uur op de [locatie]. Ik trof aldaar een vrouw aan, later bekend als [naam], geboren [datum], wonende te [adres]. Zij stond naast een geparkeerde personenauto en hield haar rechterknie vast. Ik zag dat haar knie zichtbaar geschaafd was en dat er bloed op haar kous zat. Zij gaf aan pijn te hebben aan haar knie.' },
+    { kop: 'VERKLARING SLACHTOFFER',
+      tekst: 'Het slachtoffer verklaarde het volgende, zakelijk weergegeven:\n\nZij liep omstreeks 21:45 uur over de [straatnaam] in de richting van haar auto. Een jongen liep op haar af en greep zonder iets te zeggen haar schoudertas vast. Zij voelde een harde ruk aan de tas. Zij viel daarbij op de grond en stootte haar rechterknie op de stoep. De jongen rende weg met de tas in de richting van de [straatnaam]. Zij omschreef de verdachte als een jongen van ongeveer 15 tot 17 jaar, met een rode hoodie en een donkere broek.\n\nIn de tas bevonden zich volgens het slachtoffer: een portemonnee met circa €80 aan contant geld, een bankpas op haar naam, en een mobiele telefoon, merk iPhone, type 13, kleur zwart.' },
+    { kop: 'VERKLARING GETUIGE',
+      tekst: 'Ter plaatse trof ik eveneens een getuige aan, later bekend als [naam], geboren [datum], wonende te [adres]. Hij verklaarde het volgende, zakelijk weergegeven:\n\nHij stond op de [locatie] en zag een jongen met een rode hoodie en donkere broek hard wegrennen in de richting van de [straatnaam]. Hij zag dat de jongen een tas in zijn hand had. Hij schat de leeftijd van de jongen op ongeveer 15 tot 17 jaar.' },
+    { kop: 'AANHOUDING',
+      tekst: 'Om 22:01 uur ontving ik via de portofoon van collega [naam] de melding dat hij op de [straatnaam], op 300 meter van de plaats van het misdrijf, een persoon had aangetroffen die voldeed aan het signalement. Ik begaf mij direct naar die locatie.\n\nAldaar trof ik een jongen aan, later bekend als [naam], geboren [datum]. Ik zag dat hij een rode hoodie droeg en een donkere broek, overeenkomstig het door het slachtoffer en de getuige opgegeven signalement. Ik zag dat hij de schoudertas van het slachtoffer in zijn hand hield, welke tas door het slachtoffer later is herkend als haar eigendom.\n\nOp grond van het vorenstaande — het signalement, de locatie, het tijdstip en de aangetroffen tas — bestond naar mijn oordeel een redelijk vermoeden van schuld aan straatroof als bedoeld in artikel 312 van het Wetboek van Strafrecht. Ik heb de verdachte op grond van artikel 53 van het Wetboek van Strafvordering aangehouden.' },
+    { kop: 'VERZET EN GEBRUIK VAN GEWELD',
+      tekst: 'Bij de aanhouding verzette de verdachte zich actief. Ik zag dat hij zijn armen terugtrok en zich omdraaide om weg te lopen. Ik heb hem vastgepakt bij zijn bovenarm. Er ontstond een worsteling waarbij de verdachte probeerde los te komen. Ik heb vervolgens gebruikgemaakt van een armklem om de verdachte tot stilstand te brengen en heb hem geboeid. Het verzet hield daarna op.\n\nTijdens de worsteling raakte ik zelf gewond. Ik zag en voelde dat mijn rechterhand was geschaafd. Tevens constateerde ik dat mijn dienstmouw was gescheurd ter hoogte van de rechtermouw. Ik heb dit direct gemeld aan mijn leidinggevende [naam].\n\nHet toegepaste geweld was naar mijn oordeel noodzakelijk en proportioneel om de aanhouding te kunnen voltooien. Het geweld is beëindigd zodra de verdachte geboeid was en geen verzet meer bood.' },
+    { kop: 'INBESLAGNAME',
+      tekst: 'De schoudertas die de verdachte in zijn bezit had is inbeslaggenomen als voor verbeurdverklaring vatbaar voorwerp. De tas en inhoud — portemonnee, bankpas en mobiele telefoon — zijn veiliggesteld en voorzien van een beslagsticker met nummer [nummer].' },
+    { kop: 'OVERIG',
+      tekst: 'De verdachte is overgebracht naar het bureau [naam]. Zijn leeftijd, opgegeven als [datum], is geverifieerd. Nu de verdachte de leeftijd van 16 jaar heeft en derhalve minderjarig is, is zijn wettelijk vertegenwoordiger [naam] om [tijdstip] telefonisch geïnformeerd over de aanhouding.\n\nHet slachtoffer is gewezen op de mogelijkheid tot het indienen van een schadevergoedingsvordering en heeft aangegeven hiervan gebruik te willen maken. Haar letsel — schaafwond rechterknie met bloeduitloop — is gefotografeerd en de foto\'s zijn gevoegd bij dit proces-verbaal.' },
+  ],
+
+  B: [
+    { kop: 'VERBALISANT',
+      tekst: 'Ik, [naam], surveillant van politie, werkzaam bij de Eenheid Den Haag, heb op zaterdag [datum] het volgende bevonden en verricht.' },
+    { kop: 'AANLEIDING',
+      tekst: 'Op zaterdag [datum] om 21:47 uur ontving ik via de meldkamer de opdracht te gaan naar de [straatnaam] te Den Haag. De melding betrof een straatroof.' },
+    { kop: 'BEVINDINGEN TER PLAATSE',
+      tekst: 'Ik arriveerde om 21:52 uur op de [locatie]. Ik trof aldaar een vrouw aan, later bekend als [naam]. Zij was zichtbaar overstuur en had haar knie bezeerd. Zij had duidelijk een nare ervaring gehad.' },
+    { kop: 'VERKLARING SLACHTOFFER',
+      tekst: 'Het slachtoffer verklaarde dat zij beroofd was door een jongen die haar tas had afgepakt. Zij was daarbij gevallen. In de tas zaten haar spullen waaronder haar portemonnee en telefoon.' },
+    { kop: 'VERKLARING GETUIGE',
+      tekst: 'Een getuige ter plaatse had de verdachte zien wegrennen. Hij herkende hem als iemand uit de buurt. De verdachte gedroeg zich verdacht en was duidelijk op de vlucht.' },
+    { kop: 'AANHOUDING',
+      tekst: 'Om 22:01 uur meldde collega [naam] dat hij een verdachte had aangetroffen die aan het signalement voldeed. Ik ben daarop afgegaan. De aangetroffen persoon was duidelijk zenuwachtig en probeerde weg te lopen, wat zijn betrokkenheid bij de straatroof bevestigde. Ik heb hem aangehouden.' },
+    { kop: 'VERZET EN GEBRUIK VAN GEWELD',
+      tekst: 'De verdachte werkte niet mee. Hij verzette zich en ik heb gepast geweld toegepast om hem te boeien. Ik raakte daarbij licht gewond aan mijn hand.' },
+    { kop: 'INBESLAGNAME',
+      tekst: 'De tas van het slachtoffer is inbeslaggenomen.' },
+    { kop: 'OVERIG',
+      tekst: 'De verdachte is overgebracht naar het bureau.' },
+  ],
+
+  C: [
+    { kop: 'VERBALISANT',
+      tekst: 'Ik, [naam], surveillant van politie, werkzaam bij de Eenheid Den Haag, heb op zaterdag [datum] het volgende bevonden en verricht.' },
+    { kop: 'AANLEIDING',
+      tekst: 'Op zaterdag [datum] om 21:47 uur ontving ik via de meldkamer de opdracht te gaan naar de [straatnaam] te Den Haag. De melding betrof een straatroof.' },
+    { kop: 'BEVINDINGEN TER PLAATSE',
+      tekst: 'Ik arriveerde om 21:52 uur op de [locatie]. Ik trof aldaar een vrouw aan, later bekend als [naam], geboren [datum], wonende te [adres]. Zij verklaarde beroofd te zijn door een jongen in een rode hoodie en donkere broek.' },
+    { kop: 'VERKLARING SLACHTOFFER',
+      tekst: 'Het slachtoffer verklaarde het volgende, zakelijk weergegeven:\n\nZij liep omstreeks 21:45 uur over de [straatnaam]. Een jongen pakte haar tas af en rende weg. Zij viel daarbij op de grond. In de tas bevonden zich een portemonnee met contant geld, een bankpas en een mobiele telefoon.' },
+    { kop: 'VERKLARING GETUIGE',
+      tekst: 'Een getuige verklaarde een jongen in een rode hoodie te hebben zien wegrennen. Hij kon geen verdere informatie verstrekken.' },
+    { kop: 'AANHOUDING',
+      tekst: 'Om 22:01 uur meldde collega [naam] dat hij op de [straatnaam] een jongen had aangetroffen in een rode hoodie en donkere broek. Ik ben naar die locatie gegaan. Ik zag daar een jongen staan. Ik heb hem aangehouden voor betrokkenheid bij de straatroof.' },
+    { kop: 'VERZET EN GEBRUIK VAN GEWELD',
+      tekst: 'De verdachte verzette zich bij de aanhouding. Er ontstond een worsteling. Ik heb hem uiteindelijk kunnen boeien. Ik raakte licht gewond aan mijn hand en mijn mouw scheurde.' },
+    { kop: 'INBESLAGNAME',
+      tekst: 'Bij de verdachte is de schoudertas van het slachtoffer aangetroffen en inbeslaggenomen.' },
+    { kop: 'OVERIG',
+      tekst: 'De verdachte is overgebracht naar het bureau [naam].' },
+  ],
+};
+
+const BLOKKEN = [
+  {
+    titel: 'Blok 1 — Feiten en aannames',
+    vragen: [
+      { id: 1, tekst: 'Lees de bevindingen ter plaatse. Welke uitspraken zijn gebaseerd op wat de agent zelf heeft waargenomen?',
+        opties: ['Alle bevindingen zijn gebaseerd op directe waarneming', 'Sommige bevindingen zijn conclusies of aannames — geen directe waarnemingen', 'De bevindingen ontbreken volledig'] },
+      { id: 2, tekst: 'Lees de verklaring van het slachtoffer. Wat geldt hier?',
+        opties: ['De verklaring is volledig en concreet weergegeven', 'De verklaring is samengevat maar de kern klopt', 'Essentiële details ontbreken of zijn geïnterpreteerd door de agent'] },
+    ],
+  },
+  {
+    titel: 'Blok 2 — Volledigheid',
+    vragen: [
+      { id: 3, tekst: 'Is het letsel van het slachtoffer voldoende vastgelegd voor een schadevergoedingsvordering?',
+        opties: ['Ja — letsel is concreet beschreven en gedocumenteerd', 'Gedeeltelijk — er staat iets maar het is onvoldoende', 'Nee — letsel ontbreekt of is te vaag voor een schadeclaim'] },
+      { id: 4, tekst: 'Is de minderjarigheid van de verdachte correct verwerkt in het verbaal?',
+        opties: ['Ja — leeftijd geverifieerd, wettelijk vertegenwoordiger geïnformeerd', 'Gedeeltelijk — leeftijd vermeld maar verdere stappen ontbreken', 'Nee — minderjarigheid is niet of nauwelijks verwerkt'] },
+    ],
+  },
+  {
+    titel: 'Blok 3 — Bevoegdheden',
+    vragen: [
+      { id: 5, tekst: 'Op welke grond is de verdachte aangehouden? Wat is het geval?',
+        opties: ['Juridische grond is expliciet benoemd en voldoende onderbouwd', 'Er is een grond vermeld maar de onderbouwing is onvoldoende', 'Geen juridische grond vermeld — aanhouding niet rechtmatig onderbouwd'] },
+      { id: 6, tekst: 'Is het gebruikte geweld voldoende verantwoord in het verbaal?',
+        opties: ['Ja — geweld beschreven, proportionaliteit gemotiveerd, melding gedaan', 'Gedeeltelijk — geweld vermeld maar motivering of melding ontbreekt', 'Nee — geweld nauwelijks onderbouwd en melding ontbreekt'] },
+    ],
+  },
+  {
+    titel: 'Blok 4 — Eindoordeel',
+    vragen: [
+      { id: 7, tekst: 'Wat is jouw advies aan de officier van justitie?',
+        opties: ['Vervolgen — dossier is compleet en juridisch houdbaar', 'Terugsturen — dossier bevat te veel hiaten voor vervolging', 'Sepot — aanhouding is onrechtmatig, bewijs is niet bruikbaar'] },
+    ],
+  },
+];
+
+const UITKOMSTEN = {
+  A: {
+    label: 'Veroordeling',
+    kleur: '#1A6B35',
+    achtergrond: '#EBF7EF',
+    icoon: '✓',
+    om: 'Het dossier is compleet. De officier kan vervolgen. De feiten zijn helder vastgelegd, de aanhouding is rechtmatig onderbouwd op grond van artikel 53 Sv, het bewijs is bruikbaar.',
+    slachtoffer: 'Het slachtoffer kan een schadevergoedingsvordering indienen. Het letsel is gedocumenteerd en de schade is inzichtelijk. De rechter kan dit meewegen bij de uitspraak.',
+    verdachte: 'De verdachte is minderjarig. Zijn wettelijk vertegenwoordiger is geïnformeerd. Bij veroordeling kan de rechter jeugdhulpverlening opleggen — een kans op begeleiding en perspectief.',
+  },
+  B: {
+    label: 'Teruggestuurd',
+    kleur: '#935A00',
+    achtergrond: '#FFF5E0',
+    icoon: '⚠',
+    om: 'Het dossier gaat terug naar de politie. De verklaring van het slachtoffer is te summier. Aannames zijn als feiten gepresenteerd. Onvoldoende basis voor vervolging.',
+    slachtoffer: 'Het slachtoffer moet opnieuw worden gehoord. Haar schade is niet goed vastgelegd. De schadevergoedingsvordering staat op losse schroeven. Ze doorloopt het proces opnieuw.',
+    verdachte: 'De minderjarige verdachte zit in een juridisch vacuüm. Geen duidelijkheid, geen interventie, geen hulpverlening. De zaak blijft liggen terwijl de kans op begeleiding verdwijnt.',
+  },
+  C: {
+    label: 'Sepot',
+    kleur: '#B01020',
+    achtergrond: '#FDEEF0',
+    icoon: '✗',
+    om: 'De aanhouding is niet rechtmatig onderbouwd. Geen juridische grond vermeld. Alles wat daarna is gevonden — de tas, het bewijs — is onrechtmatig verkregen en niet bruikbaar. De officier seponeert.',
+    slachtoffer: 'De straatroof is feitelijk bewezen maar strafrechtelijk niet vervolgbaar. Geen gerechtigheid. Geen schadevergoeding. Niet omdat de zaak niet klopte — maar omdat het verbaal niet klopte.',
+    verdachte: 'De verdachte gaat vrijuit. Niet omdat hij onschuldig is. Geen veroordeling, geen jeugdhulpverlening, geen begeleiding. Een gemiste kans door een onrechtmatige aanhouding.',
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let staat = {
+  stap: 0,
+  verbaalSleutel: null,
+  antwoorden: {},
+  verbaalOpen: false,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+function verbaalSectiesHTML(secties) {
+  return secties.map(s => `
+    <div class="doc-sectie">
+      <div class="doc-kop">${s.kop}</div>
+      ${s.tekst.split('\n\n').map(p => `<div class="doc-tekst">${p}</div>`).join('')}
+    </div>
+  `).join('');
+}
+
+function alleBeantwoord(blokIndex) {
+  return BLOKKEN[blokIndex].vragen.every(v => staat.antwoorden[v.id] !== undefined);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCHERMEN
+// ═══════════════════════════════════════════════════════════════
+
+function schermIntro() {
+  return `
+    <div style="text-align:center;padding:8px 0 24px">
+      <div style="width:72px;height:72px;border-radius:18px;background:#082D6B;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:34px">⚖️</div>
+      <h1 style="font-size:22px;font-weight:700;color:#1A2333;margin:0 0 6px">Verbaal beoordelen</h1>
+      <p class="gedempt" style="font-size:14px">Casustraining · Straatroof</p>
+    </div>
+
+    <div class="kaart" style="margin-bottom:12px">
+      <p class="body-tekst" style="margin-bottom:10px">Je bent rechercheur in opleiding. Je ontvangt een proces-verbaal over een straatroof.</p>
+      <p class="body-tekst">Jouw taak: lees het verbaal, herken wat goed en fout is, en adviseer de officier van justitie.</p>
+    </div>
+
+    <div class="kaart-geel">
+      <p style="font-size:13px;color:#6B4400;line-height:1.6;margin:0"><strong>Let op:</strong> maak geen aannames. Vul niets in dat er niet staat. Alleen wat bewijsbaar en waarneembaar is telt.</p>
+    </div>
+
+    <p style="font-size:11px;font-weight:700;color:#5E6B7E;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 10px">Demonstratie — kies een verbaal</p>
+
+    ${['A','B','C'].map(v => `
+      <button class="verbaal-optie${staat.verbaalSleutel === v ? ' geselecteerd' : ''}" onclick="kiesVerbaal('${v}')">
+        ${staat.verbaalSleutel === v ? '● Verbaal ' + v + ' geselecteerd' : '○ Verbaal ' + v}
+      </button>
+    `).join('')}
+
+    <div style="margin-top:20px">
+      <button class="knop knop-primary" onclick="volgende()" ${!staat.verbaalSleutel ? 'disabled' : ''}>Start →</button>
+    </div>
+  `;
+}
+
+function schermSituatie() {
+  const items = [
+    { icoon: '🕘', tekst: 'Zaterdagavond, 21:45 uur, Centrum Den Haag.' },
+    { icoon: '👜', tekst: 'Slachtoffer: vrouw, 52 jaar, loopt alleen naar haar auto. Een jongen pakt haar schoudertas en rent weg. Zij valt en stoot haar rechterknie. In de tas: portemonnee (€80 contant), bankpas, iPhone 13 zwart.' },
+    { icoon: '👁', tekst: 'Getuige ziet jongen wegrennen. Signalement: rode hoodie, donkere broek, geschat 15–17 jaar.' },
+    { icoon: '🚔', tekst: 'Collega houdt 300 meter verderop een jongen aan die voldoet aan het signalement. De jongen verzet zich actief. Er ontstaat een worsteling. De agent raakt gewond — geschaafde hand, gescheurde mouw. Verdachte wordt geboeid. De tas wordt bij hem aangetroffen. Verdachte is 16 jaar.' },
+  ];
+  return `
+    <p class="eyebrow">Het incident</p>
+    <h2 class="scherm-titel">Wat is er gebeurd?</h2>
+    ${items.map(i => `
+      <div class="situatie-item">
+        <span class="situatie-icoon">${i.icoon}</span>
+        <p class="body-tekst">${i.tekst}</p>
+      </div>
+    `).join('')}
+    <div class="kaart-blauw" style="margin-top:4px;margin-bottom:24px">
+      <p style="font-size:13px;color:#082D6B;line-height:1.6;margin:0"><strong>Jouw rol:</strong> Je leest het verbaal dat de agent heeft opgemaakt. Beoordeel wat er staat en wat er ontbreekt of onjuist is.</p>
+    </div>
+    <button class="knop knop-primary" onclick="volgende()">Lees het verbaal →</button>
+    <button class="knop knop-ghost" onclick="vorige()">← Terug</button>
+  `;
+}
+
+function schermVerbaal() {
+  const secties = VERBALEN[staat.verbaalSleutel] || [];
+  return `
+    <p class="eyebrow">Verbaal ${staat.verbaalSleutel}</p>
+    <h2 class="scherm-titel" style="margin-bottom:4px">Proces-verbaal</h2>
+    <p class="gedempt" style="font-size:13px;margin-bottom:16px">Lees zorgvuldig. Maak geen aannames.</p>
+
+    <div class="document">
+      <div class="doc-hoofd">
+        <div class="doc-titel">PROCES-VERBAAL VAN BEVINDINGEN EN AANHOUDING</div>
+        <div class="doc-subtitel">Politie · Eenheid Den Haag</div>
+      </div>
+      ${verbaalSectiesHTML(secties)}
+    </div>
+
+    <button class="knop knop-rood" onclick="volgende()">Begin beoordeling →</button>
+    <button class="knop knop-ghost" onclick="vorige()">← Terug</button>
+  `;
+}
+
+function schermBlok(blokIndex) {
+  const blok = BLOKKEN[blokIndex];
+  const isLaatste = blokIndex === BLOKKEN.length - 1;
+  const secties = VERBALEN[staat.verbaalSleutel] || [];
+  const klaar = alleBeantwoord(blokIndex);
+
+  return `
+    <div class="blok-header">
+      <div>
+        <p class="eyebrow" style="margin-bottom:4px">${blok.titel}</p>
+        <h2 style="font-size:18px;font-weight:700;color:#1A2333;margin:0">Beoordeel het verbaal</h2>
+      </div>
+      <button class="verbaal-toggle" onclick="toggleVerbaal()">📄 Verbaal</button>
+    </div>
+
+    ${staat.verbaalOpen ? `
+      <div class="document-mini">
+        ${verbaalSectiesHTML(secties)}
+      </div>
+    ` : ''}
+
+    ${blok.vragen.map(v => `
+      <div class="vraag-blok">
+        <p class="vraag-tekst">${v.id}. ${v.tekst}</p>
+        ${v.opties.map((opt, idx) => `
+          <button class="optie-knop${staat.antwoorden[v.id] === idx ? ' geselecteerd' : ''}" onclick="kiesAntwoord(${v.id}, ${idx})">
+            <span style="margin-right:8px;color:${staat.antwoorden[v.id] === idx ? '#082D6B' : '#5E6B7E'}">${staat.antwoorden[v.id] === idx ? '●' : '○'}</span>${opt}
+          </button>
+        `).join('')}
+      </div>
+    `).join('')}
+
+    <button class="knop knop-primary" onclick="volgende()" ${!klaar ? 'disabled' : ''}>
+      ${isLaatste ? 'Bekijk uitkomst →' : 'Volgende →'}
+    </button>
+    <button class="knop knop-ghost" onclick="vorige()">← Terug</button>
+  `;
+}
+
+function schermUitkomst() {
+  const u = UITKOMSTEN[staat.verbaalSleutel];
+  return `
+    <div class="uitkomst-header" style="background:${u.achtergrond};border:1px solid ${u.kleur}30">
+      <div class="verdict-icoon" style="background:${u.kleur}">${u.icoon}</div>
+      <div class="verdict-label" style="color:${u.kleur}">${u.label}</div>
+      <p class="gedempt" style="font-size:13px;margin-top:4px">Dit was verbaal ${staat.verbaalSleutel}</p>
+    </div>
+
+    ${[
+      { icoon: '⚖️', label: 'Het OM',                  tekst: u.om },
+      { icoon: '👩', label: 'Het slachtoffer',          tekst: u.slachtoffer },
+      { icoon: '👦', label: 'De jeugdige verdachte',   tekst: u.verdachte },
+    ].map(g => `
+      <div class="gevolg-kaart">
+        <div class="gevolg-header">
+          <span style="font-size:18px">${g.icoon}</span>
+          <span class="gevolg-label">${g.label}</span>
+        </div>
+        <p class="body-tekst">${g.tekst}</p>
+      </div>
+    `).join('')}
+
+    <div class="nabespreking">
+      <p style="font-size:14px;font-weight:600;color:#082D6B;margin:0 0 6px">Nabespreking</p>
+      <p style="font-size:13px;color:#082D6B;line-height:1.6;margin:0">Vergelijk je uitkomst met die van je medestudenten. Wie had welk verbaal? Welke fouten zijn gevonden? Wat had anders gemoeten?</p>
+    </div>
+
+    <button class="knop knop-ghost" onclick="reset()">Opnieuw beginnen</button>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+
+function render() {
+  const TOTAAL = 7;
+  const { stap, verbaalSleutel } = staat;
+  const voortgang = stap === 0 ? 0 : Math.round((stap / TOTAAL) * 100);
+
+  // Header
+  document.getElementById('header').innerHTML = `
+    <div class="header-rij${stap > 0 ? ' met-balk' : ''}">
+      <span class="header-label">Openbaar Ministerie · Den Haag</span>
+      ${verbaalSleutel && stap > 0 ? `<span class="header-badge">Verbaal ${verbaalSleutel}</span>` : ''}
+    </div>
+    ${stap > 0 ? `<div class="voortgang-balk"><div class="voortgang-vulling" style="width:${voortgang}%"></div></div>` : ''}
+  `;
+
+  // Content
+  const schermen = {
+    0: schermIntro,
+    1: schermSituatie,
+    2: schermVerbaal,
+    3: () => schermBlok(0),
+    4: () => schermBlok(1),
+    5: () => schermBlok(2),
+    6: () => schermBlok(3),
+    7: schermUitkomst,
+  };
+
+  document.getElementById('content').innerHTML = (schermen[stap] || (() => ''))();
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTIES
+// ═══════════════════════════════════════════════════════════════
+
+function volgende()          { staat.verbaalOpen = false; staat.stap = Math.min(7, staat.stap + 1); render(); }
+function vorige()            { staat.verbaalOpen = false; staat.stap = Math.max(0, staat.stap - 1); render(); }
+function kiesVerbaal(v)      { staat.verbaalSleutel = v; render(); }
+function kiesAntwoord(id, i) { staat.antwoorden[id] = i; render(); }
+function toggleVerbaal()     { staat.verbaalOpen = !staat.verbaalOpen; render(); }
+function reset()             { staat = { stap: 0, verbaalSleutel: null, antwoorden: {}, verbaalOpen: false }; render(); }
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+
+render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

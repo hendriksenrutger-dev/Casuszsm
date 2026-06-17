@@ -1,0 +1,19 @@
+{
+  "name": "Casustraining OM",
+  "short_name": "Casustraining",
+  "description": "Verbaal beoordelen — casustraining Openbaar Ministerie",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#082D6B",
+  "theme_color": "#082D6B",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
