@@ -667,7 +667,7 @@ function render() {
   // Header
   document.getElementById('header').innerHTML = `
     <div class="header-rij${stap > 0 ? ' met-balk' : ''}">
-      <span class="header-label">Openbaar Ministerie · Den Haag</span>
+      <span class="header-label">ZSM Amsterdam</span>
       ${verbaalSleutel && stap > 0 ? `<span class="header-badge">Verbaal ${verbaalSleutel}</span>` : ''}
     </div>
     ${stap > 0 ? `<div class="voortgang-balk"><div class="voortgang-vulling" style="width:${voortgang}%"></div></div>` : ''}
@@ -708,7 +708,7 @@ render();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
   });
 }
 </script>

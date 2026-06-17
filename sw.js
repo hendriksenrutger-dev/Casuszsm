@@ -1,39 +1,27 @@
 // Casustraining OM — Service Worker
-// Versie verhogen bij elke update van index.html
-const CACHE_NAAM = 'casustraining-v1';
+// Network-first strategie: altijd verse versie ophalen, cache als fallback
+const CACHE = 'casustraining';
 
-const BESTANDEN = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg',
-];
+const BESTANDEN = ['./', './index.html', './manifest.json', './icon.svg'];
 
-// Installatie: cache alle bestanden
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAAM).then(cache => cache.addAll(BESTANDEN))
-  );
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(BESTANDEN)));
   self.skipWaiting();
 });
 
-// Activatie: verwijder oude caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAAM)
-          .map(key => caches.delete(key))
-      )
-    )
-  );
+self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: cache-first strategie
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+// Network-first: haal altijd vers op, sla op in cache, val terug op cache bij geen internet
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    fetch(e.request)
+      .then(response => {
+        const kopie = response.clone();
+        caches.open(CACHE).then(c => c.put(e.request, kopie));
+        return response;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
